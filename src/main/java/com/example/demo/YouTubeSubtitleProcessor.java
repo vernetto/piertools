@@ -1,5 +1,4 @@
 package com.example.demo;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,10 +7,15 @@ import org.jsoup.select.Elements;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.text.StringEscapeUtils;
+
 
 public class YouTubeSubtitleProcessor {
 
@@ -28,7 +32,9 @@ public class YouTubeSubtitleProcessor {
     }
 
     // Step 2: Divide Text into Paragraphs
-    public static List<String> divideIntoParagraphs(String content) {
+    public static List<String> divideIntoParagraphs(String encodedContent) {
+        String content = StringEscapeUtils.unescapeHtml4(encodedContent);
+
         List<String> paragraphs = new ArrayList<>();
         int index = 0;
 
@@ -36,15 +42,27 @@ public class YouTubeSubtitleProcessor {
             int endIndex = Math.min(index + 300, content.length());
 
             // Ensure paragraph ends with a punctuation or appropriate place
-            while (endIndex < content.length() && !isEndOfSentence(content.charAt(endIndex))) {
-                endIndex--;
+            int lastPunctuationIndex = -1;
+            for (int i = index; i < endIndex; i++) {
+                if (isEndOfSentence(content.charAt(i))) {
+                    lastPunctuationIndex = i;
+                }
             }
 
-            if (endIndex == index) {  // Handle case with no sentence-ending character
-                endIndex = Math.min(index + 300, content.length());
-                while (endIndex < content.length() && !Character.isUpperCase(content.charAt(endIndex))) {
-                    endIndex++;
+            if (lastPunctuationIndex != -1) {
+                endIndex = lastPunctuationIndex + 1; // Set endIndex to just after the punctuation
+            } else {
+                // No punctuation found, find the nearest uppercase starting word within 300 chars
+                for (int i = endIndex; i > index; i--) {
+                    if (i < content.length() && Character.isUpperCase(content.charAt(i))) {
+                        endIndex = i;
+                        break;
+                    }
                 }
+            }
+
+            if (endIndex <= index) {  // Avoid StringIndexOutOfBoundsException
+                endIndex = Math.min(index + 300, content.length());
             }
 
             String paragraph = content.substring(index, endIndex).trim();
@@ -102,6 +120,8 @@ public class YouTubeSubtitleProcessor {
 
             // Fetch subtitle content
             String content = getSubtitleContent(subtitleUrl);
+            Path filePath = Paths.get(videoId + ".raw.txt");
+            Files.write(filePath, content.getBytes());
 
             // Divide into paragraphs
             List<String> paragraphs = divideIntoParagraphs(content);
