@@ -1,4 +1,4 @@
-package com.example.filemover;
+package com.pierre.filemover;
 
 import java.io.File;
 import java.nio.file.Files;

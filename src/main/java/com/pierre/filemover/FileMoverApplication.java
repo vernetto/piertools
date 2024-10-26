@@ -1,4 +1,4 @@
-package com.example.filemover;
+package com.pierre.filemover;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
