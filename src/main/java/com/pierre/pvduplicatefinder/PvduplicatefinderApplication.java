@@ -1,21 +1,24 @@
 package com.pierre.pvduplicatefinder;
 
-import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.util.List;
 
-public class PvduplicatefinderApplication {
+@SpringBootApplication
+public class PvduplicatefinderApplication implements CommandLineRunner {
+    @Autowired
+    FinderService finderService;
 
-    FinderService finderService = new FinderService();
-
-    public static void main(String[] args) throws IOException {
-        PvduplicatefinderApplication pvduplicatefinderApplication  = new PvduplicatefinderApplication();
-        pvduplicatefinderApplication.find();
+    public static void main(String[] args) {
+        SpringApplication.run(PvduplicatefinderApplication.class, args);
     }
 
-    public void find() throws IOException {
-        List<DuplicateCollection> result = finderService.findDuplicates("D:\\", "S:\\");
+    @Override
+    public void run(String... args) throws Exception {
+        List<DuplicateCollection> result = finderService.findDuplicates("D:\\temp");
         System.out.println(result);
     }
-
-
 }
