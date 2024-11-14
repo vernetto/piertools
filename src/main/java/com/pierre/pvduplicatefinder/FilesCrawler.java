@@ -15,16 +15,17 @@ import java.util.List;
 @Service
 @Slf4j
 public class FilesCrawler {
+    int count = 0;
 
     List<FileInfo> findAllFileInfo(String rootFolder) throws IOException {
         return findAllFileInfo(Paths.get(rootFolder));
     }
 
     List<FileInfo> findAllFileInfo(Path rootFolder) throws IOException {
-        log.info("reading files in " + rootFolder.getFileName());
+        //log.info("reading files in " + rootFolder.getFileName());
         List<FileInfo> fileInfos = new ArrayList<>();
         if (rootFolder == null || rootFolder.toFile() == null || rootFolder.toFile().listFiles() == null) {
-            log.info("empty folder or path");
+            //log.info("empty folder or path");
             return fileInfos;
         }
         for (File file : rootFolder.toFile().listFiles()) {
@@ -43,7 +44,11 @@ public class FilesCrawler {
 
             }
         }
-
+        int countAfter = count + fileInfos.size();
+        if ((countAfter / 1000) != (count / 1000)) {
+            log.info("count is now " + countAfter + " while scanning " + rootFolder.toString());
+        }
+        count = countAfter;
         return fileInfos;
     }
 
