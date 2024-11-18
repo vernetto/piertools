@@ -2,22 +2,24 @@ package com.pierre.pvduplicatefinder;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FinderService {
+    public static final int MINSIZEFORDUPLICATE = 1000000;
     @Autowired
     FilesCrawler filesCrawler;
     BufferedWriter writer = null;
@@ -31,21 +33,24 @@ public class FinderService {
             allFiles.addAll(filesCrawler.findAllFileInfo(rootLocation));
         }
         Collections.sort(allFiles, Comparator.comparing(FileInfo::getSize));
-        writeData("printing all files, smallest first:");
-        allFiles.forEach(fileInfo -> writeData(fileInfo.toString()));
-        writeData("=====================");
+        //writeData("printing all files, smallest first:");
+        //allFiles.forEach(fileInfo -> writeData(fileInfo.toString()));
+        //writeData("=====================");
         // now searching duplicates: group files by size first
         Map<Long, List<FileInfo>> allFilesGroupedBySize = allFiles.stream().collect(Collectors.groupingBy(FileInfo::getSize));
         //allFilesGroupedBySize.forEach((aLong, fileInfos) -> writeData(aLong + " " + fileInfos));
         writeData("============  DUPLICATES =========\n");
+        List<List<FileInfo>> duplicates = new ArrayList<>();
         allFilesGroupedBySize.forEach((aSize, fileInfos) -> {
             // check if for this size there are more than 1 file
-            if (fileInfos.size() > 1) {
+            if (fileInfos.size() > 1 && aSize.intValue() > MINSIZEFORDUPLICATE) {
                 // if so, compute hash for each of those files
                 fileInfos.forEach(fileInfo -> {
                     try {
-                        fileInfo.sha2 = DigestUtils.sha256Hex(new FileInputStream(fileInfo.path.toFile()));
-                    } catch (IOException e) {
+                        log.info("computing sha2 for " + fileInfo.getPath());
+                        //fileInfo.sha2 = DigestUtils.sha256Hex(new FileInputStream(fileInfo.path.toFile()));
+                        fileInfo.sha2 = PierreDigestUtils.computePartialSHA256(fileInfo.path.toFile(), 2048);
+                    } catch (IOException | NoSuchAlgorithmException e) {
                         log.error("error" , e);
                         fileInfo.sha2 = "ERROR";
                     }
@@ -61,12 +66,18 @@ public class FinderService {
                             throw new RuntimeException(e);
                         }
                         writeData(json);
+                        duplicates.add(fileInfos1);
                     }
                 });
 
             }
         });
         closeWriter();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        File outputFile = new File("duplicates_" + timestamp + ".json");
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.writeValue(outputFile, duplicates);
+
         return result;
     }
 

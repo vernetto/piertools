@@ -22,21 +22,24 @@ public class FilesCrawler {
     }
 
     List<FileInfo> findAllFileInfo(Path rootFolder) throws IOException {
-        //log.info("reading files in " + rootFolder.getFileName());
         List<FileInfo> fileInfos = new ArrayList<>();
+        //log.info("reading files in " + rootFolder.getFileName());
+        String lowerCase = rootFolder.toString().toLowerCase();
+        if (lowerCase.contains("itunes") || lowerCase.contains("calibre")) {
+            return fileInfos;
+        }
         if (rootFolder == null || rootFolder.toFile() == null || rootFolder.toFile().listFiles() == null) {
             //log.info("empty folder or path");
             return fileInfos;
         }
         for (File file : rootFolder.toFile().listFiles()) {
             Path thisPath = file.toPath();
-            if (file.isDirectory() && ! (file.getPath().equals(rootFolder.toFile().getPath()))) {
+            if (file.isDirectory() && !(file.getPath().equals(rootFolder.toFile().getPath()))) {
                 fileInfos.addAll(findAllFileInfo(thisPath));
-            }
-            else {
+            } else {
                 try {
                     FileChannel fileChannel = FileChannel.open(thisPath);
-                    FileInfo fileInfo = FileInfo.builder().path(thisPath).size(fileChannel.size()).time(Files.getLastModifiedTime(thisPath)).build();
+                    FileInfo fileInfo = FileInfo.builder().path(thisPath).size(fileChannel.size()).time(Files.getLastModifiedTime(thisPath)).fileAction(FileAction.NOTHING).build();
                     fileInfos.add(fileInfo);
                 } catch (IOException e) {
                     log.error("error", e);

@@ -18,7 +18,7 @@ public class PvduplicatefinderApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<DuplicateCollection> result = finderService.findDuplicates("D:\\");
+        List<DuplicateCollection> result = finderService.findDuplicates("D:\\temp");
         System.out.println(result);
     }
 }
