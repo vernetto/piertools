@@ -8,12 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.List;
 
 @SpringBootApplication
-public class PvduplicatefinderApplication implements CommandLineRunner {
+public class PvduplicatefinderApp implements CommandLineRunner {
     @Autowired
     FinderService finderService;
 
     public static void main(String[] args) {
-        SpringApplication.run(PvduplicatefinderApplication.class, args);
+        SpringApplication.run(PvduplicatefinderApp.class, args);
     }
 
     @Override
