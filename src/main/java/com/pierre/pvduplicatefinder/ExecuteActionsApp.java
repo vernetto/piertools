@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 public class ExecuteActionsApp {
 
-    static final boolean DRYRUN = false;
+    static final boolean DRYRUN = true;
 
     public static void main(String[] args) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Read the entire file as a List<List<FileInfo>>
-        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411182140.json"),
+        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411182314.json"),
                 new TypeReference<ArrayList<List<FileInfo>>>() {});
 
         List<FileInfo> fileInfoListsFlat = fileInfoLists.stream()
@@ -56,6 +56,9 @@ public class ExecuteActionsApp {
                         throw new RuntimeException(e);
                     }
                 }
+            }
+            else {
+                System.out.println("not a regular file or not found: " + fileInfo.getPath());
             }
 
         });
