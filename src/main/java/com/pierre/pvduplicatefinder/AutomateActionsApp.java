@@ -21,19 +21,25 @@ public class AutomateActionsApp {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Read the entire file as a List<List<FileInfo>>
-        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File(DUPLICATES_JSON_FILE),
+        List<List<FileInfo>> fileInfoListsFromJSON = objectMapper.readValue(new File(DUPLICATES_JSON_FILE),
                 new TypeReference<ArrayList<List<FileInfo>>>() {});
 
+        List<FileInfoList> fileInfoList = fileInfoListsFromJSON.stream()
+                .map(FileInfoList::new) // Use the FileInfoList constructor directly
+                .collect(Collectors.toList());
 
-        fileInfoLists.forEach(fileInfos -> {
-            fileInfos.forEach(fileInfo -> {
-                if (fileInfo.getPath().toString().contains("denhaag20040223")) {
-                    fileInfo.setFileAction(FileAction.DEL);
-                }
-            });
+        fileInfoList.forEach(fileInfos -> {
+            if (fileInfos.containsPathAndPath("denhaag20040223", "koln040215")) {
+                fileInfos.forEach(fileInfo -> {
+                    if (fileInfo.getPath().toString().contains("denhaag20040223")) {
+                        fileInfo.setFileAction(FileAction.DEL);
+                        System.out.println("marking DEL on " + fileInfo.getPath().toString());
+                    }
+                });
+            }
         });
 
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(DUPLICATES_JSON_FILE), fileInfoLists);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(DUPLICATES_JSON_FILE), fileInfoListsFromJSON);
 
     }
 
