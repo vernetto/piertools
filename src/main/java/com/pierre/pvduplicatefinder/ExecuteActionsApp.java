@@ -20,7 +20,7 @@ public class ExecuteActionsApp {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Read the entire file as a List<List<FileInfo>>
-        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411182314.json"),
+        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411190842.json"),
                 new TypeReference<ArrayList<List<FileInfo>>>() {});
 
         List<FileInfo> fileInfoListsFlat = fileInfoLists.stream()
