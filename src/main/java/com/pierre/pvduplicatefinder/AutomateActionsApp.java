@@ -25,7 +25,7 @@ public class AutomateActionsApp {
                 .collect(Collectors.toList());
 
         fileInfoList.forEach(fileInfos -> {
-            if (fileInfos.containsBothPath("denhaag20040223", "koln040215")) {
+            if (fileInfos.containsBothPaths("denhaag20040223", "koln040215")) {
                 fileInfos.forEach(fileInfo -> {
                     if (fileInfo.getPath().toString().contains("denhaag20040223")) {
                         fileInfo.setFileAction(FileAction.DEL);
