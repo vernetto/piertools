@@ -2,6 +2,7 @@ package com.pierre.filescanner;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pierre.pvduplicatefinder.FileInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,22 +14,21 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileDiffCheckerApp {
 
     public static void main(String[] args) {
         Path folderPath = Paths.get("D:\\temp");
         String previousJsonFile = "filedump_202411231257.json";
-        List<ScanFileInfo> addedFiles = new ArrayList<>();
-        List<ScanFileInfo> removedFiles = new ArrayList<>();
-        List<ScanFileInfo> modifiedFiles = new ArrayList<>();
+        List<FileInfo> addedFiles = new ArrayList<>();
+        List<FileInfo> removedFiles = new ArrayList<>();
+        List<FileInfo> modifiedFiles = new ArrayList<>();
 
         try {
-            List<ScanFileInfo> previousScanFileInfos = readPreviousScanFileInfos(previousJsonFile);
-            Map<String, ScanFileInfo> previousScanFileInfoMap = new HashMap<>();
-            for (ScanFileInfo ScanFileInfo : previousScanFileInfos) {
-                previousScanFileInfoMap.put(ScanFileInfo.getFullPath(), ScanFileInfo);
+            List<FileInfo> previousFileInfos = readPreviousScanFileInfos(previousJsonFile);
+            Map<String, FileInfo> previousScanFileInfoMap = new HashMap<>();
+            for (FileInfo FileInfo : previousFileInfos) {
+                previousScanFileInfoMap.put(FileInfo.getPath().toString(), FileInfo);
             }
 
             Set<String> currentFilesSet = new HashSet<>();
@@ -37,14 +37,14 @@ public class FileDiffCheckerApp {
                     .filter(Files::isRegularFile)
                     .forEach(file -> {
                         try {
-                            ScanFileInfo currentScanFileInfo = getScanFileInfo(file);
-                            currentFilesSet.add(currentScanFileInfo.getFullPath());
-                            ScanFileInfo previousScanFileInfo = previousScanFileInfoMap.get(currentScanFileInfo.getFullPath());
+                            FileInfo currentFileInfo = getScanFileInfo(file);
+                            currentFilesSet.add(currentFileInfo.getPath().toString());
+                            FileInfo previousFileInfo = previousScanFileInfoMap.get(currentFileInfo.getPath().toString());
 
-                            if (previousScanFileInfo == null) {
-                                addedFiles.add(currentScanFileInfo);
-                            } else if (isModified(currentScanFileInfo, previousScanFileInfo)) {
-                                modifiedFiles.add(currentScanFileInfo);
+                            if (previousFileInfo == null) {
+                                addedFiles.add(currentFileInfo);
+                            } else if (isModified(currentFileInfo, previousFileInfo)) {
+                                modifiedFiles.add(currentFileInfo);
                             }
                         } catch (IOException | NoSuchAlgorithmException e) {
                             System.err.println("Error processing file: " + file + " - " + e.getMessage());
@@ -52,9 +52,9 @@ public class FileDiffCheckerApp {
                     });
 
             // Identify removed files
-            for (ScanFileInfo previousScanFileInfo : previousScanFileInfos) {
-                if (!currentFilesSet.contains(previousScanFileInfo.getFullPath())) {
-                    removedFiles.add(previousScanFileInfo);
+            for (FileInfo previousFileInfo : previousFileInfos) {
+                if (!currentFilesSet.contains(previousFileInfo.getPath())) {
+                    removedFiles.add(previousFileInfo);
                 }
             }
 
@@ -66,22 +66,22 @@ public class FileDiffCheckerApp {
     }
 
 
-    private static boolean isModified(ScanFileInfo current, ScanFileInfo previous) throws IOException, NoSuchAlgorithmException {
+    private static boolean isModified(FileInfo current, FileInfo previous) throws IOException, NoSuchAlgorithmException {
         if (previous == null) return true; // New file
-        if (current.getSize() != previous.getSize() || current.getLastModified() != previous.getLastModified()) {
+        if (current.getSize() != previous.getSize() || current.getTime() != previous.getTime()) {
             // Size or lastModified differs, check sha2 for confirmation
-            return !current.getSha2Digest().equals(previous.getSha2Digest());
+            return !current.getSha2().equals(previous.getSha2());
         }
         return false; // No modification detected
     }
 
-    private static ScanFileInfo getScanFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
-        ScanFileInfo ScanFileInfo = new ScanFileInfo();
-        ScanFileInfo.setFullPath(file.toString());
-        ScanFileInfo.setSize(Files.size(file));
-        ScanFileInfo.setLastModified(Files.getLastModifiedTime(file).toMillis());
-        ScanFileInfo.setSha2Digest(calculateSHA256(file));
-        return ScanFileInfo;
+    private static FileInfo getScanFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
+        FileInfo FileInfo = new FileInfo();
+        FileInfo.setPath(file.toAbsolutePath());
+        FileInfo.setSize(Files.size(file));
+        FileInfo.setTime(Files.getLastModifiedTime(file));
+        FileInfo.setSha2(calculateSHA256(file));
+        return FileInfo;
     }
 
     private static String calculateSHA256(Path file) throws IOException, NoSuchAlgorithmException {
@@ -103,17 +103,17 @@ public class FileDiffCheckerApp {
         return hexString.toString();
     }
 
-    private static List<ScanFileInfo> readPreviousScanFileInfos(String previousJsonFile) throws IOException {
+    private static List<FileInfo> readPreviousScanFileInfos(String previousJsonFile) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new File(previousJsonFile), new TypeReference<List<ScanFileInfo>>() {});
+        return mapper.readValue(new File(previousJsonFile), new TypeReference<List<FileInfo>>() {});
     }
 
-    private static void saveToJsonFile(List<ScanFileInfo> addedFiles, List<ScanFileInfo> removedFiles, List<ScanFileInfo> modifiedFiles) {
+    private static void saveToJsonFile(List<FileInfo> addedFiles, List<FileInfo> removedFiles, List<FileInfo> modifiedFiles) {
         String timestamp = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
         String fileName = "filediffs_" + timestamp + ".json";
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, List<ScanFileInfo>> result = new HashMap<>();
+        Map<String, List<FileInfo>> result = new HashMap<>();
         result.put("added", addedFiles);
         result.put("removed", removedFiles);
         result.put("modified", modifiedFiles);
@@ -128,12 +128,12 @@ public class FileDiffCheckerApp {
 
 
 
-    private static ScanFileInfo getFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
-        ScanFileInfo fileInfo = new ScanFileInfo();
-        fileInfo.setFullPath(file.toString());
+    private static FileInfo getFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setPath(file.toAbsolutePath());
         fileInfo.setSize(Files.size(file));
-        fileInfo.setLastModified(Files.getLastModifiedTime(file).toMillis());
-        fileInfo.setSha2Digest(calculateSHA256(file));
+        fileInfo.setTime(Files.getLastModifiedTime(file));
+        fileInfo.setSha2(calculateSHA256(file));
         return fileInfo;
     }
 

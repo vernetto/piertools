@@ -3,8 +3,10 @@ package com.pierre.pvduplicatefinder;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -12,6 +14,8 @@ import java.nio.file.attribute.FileTime;
 @Data
 @Builder
 @JsonDeserialize(builder = FileInfo.FileInfoBuilder.class)
+@NoArgsConstructor
+@AllArgsConstructor
 public class FileInfo {
     Path path;
     @JsonDeserialize(using = FileTimeDeserializer.class)

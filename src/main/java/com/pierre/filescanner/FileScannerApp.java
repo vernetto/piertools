@@ -2,6 +2,7 @@ package com.pierre.filescanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.pierre.pvduplicatefinder.FileInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,21 +21,21 @@ public class FileScannerApp {
 
     public static void main(String[] args) {
         String[] foldersToScan = new String[] {"D:\\temp"};
-        List<ScanFileInfo> scanFileInfos = new ArrayList<>();
+        List<FileInfo> fileInfos = new ArrayList<>();
         for (String folderPath : foldersToScan) {
-            scanFolder(Paths.get(folderPath), scanFileInfos);
+            scanFolder(Paths.get(folderPath), fileInfos);
         }
 
-        saveToJsonFile(scanFileInfos);
+        saveToJsonFile(fileInfos);
     }
 
-    private static void scanFolder(Path folderPath, List<ScanFileInfo> scanFileInfos) {
+    private static void scanFolder(Path folderPath, List<FileInfo> fileInfos) {
         try {
             Files.walk(folderPath)
                     .filter(Files::isRegularFile)
                     .forEach(file -> {
                         try {
-                            scanFileInfos.add(getFileInfo(file));
+                            fileInfos.add(getFileInfo(file));
                         } catch (IOException | NoSuchAlgorithmException e) {
                             System.err.println("Error processing file: " + file + " - " + e.getMessage());
                         }
@@ -44,13 +45,13 @@ public class FileScannerApp {
         }
     }
 
-    private static ScanFileInfo getFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
-        ScanFileInfo scanFileInfo = new ScanFileInfo();
-        scanFileInfo.setFullPath(file.toString());
-        scanFileInfo.setSize(Files.size(file));
-        scanFileInfo.setLastModified(Files.getLastModifiedTime(file).toMillis());
-        scanFileInfo.setSha2Digest(calculateSHA256(file));
-        return scanFileInfo;
+    private static FileInfo getFileInfo(Path file) throws IOException, NoSuchAlgorithmException {
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setPath(file.toAbsolutePath());
+        fileInfo.setSize(Files.size(file));
+        fileInfo.setTime(Files.getLastModifiedTime(file));
+        fileInfo.setSha2(calculateSHA256(file));
+        return fileInfo;
     }
 
     private static String calculateSHA256(Path file) throws IOException, NoSuchAlgorithmException {
@@ -72,13 +73,13 @@ public class FileScannerApp {
         return hexString.toString();
     }
 
-    private static void saveToJsonFile(List<ScanFileInfo> scanFileInfos) {
+    private static void saveToJsonFile(List<FileInfo> fileInfos) {
         String timestamp = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
         String fileName = "filedump_" + timestamp + ".json";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
-            mapper.writeValue(new File(fileName), scanFileInfos);
+            mapper.writeValue(new File(fileName), fileInfos);
             System.out.println("File dump saved to: " + fileName);
         } catch (IOException e) {
             System.err.println("Error saving JSON file: " + e.getMessage());
