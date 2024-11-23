@@ -20,7 +20,7 @@ public class ExecuteActionsApp {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Read the entire file as a List<List<FileInfo>>
-        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411190842.json"),
+        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411222030.json"),
                 new TypeReference<ArrayList<List<FileInfo>>>() {});
 
         List<FileInfo> fileInfoListsFlat = fileInfoLists.stream()
@@ -35,7 +35,7 @@ public class ExecuteActionsApp {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(json);
+            //System.out.println(json);
         });
 
         fileInfoListsFlat.forEach(fileInfo -> {

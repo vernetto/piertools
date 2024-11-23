@@ -25,7 +25,7 @@ public class FilesCrawler {
         List<FileInfo> fileInfos = new ArrayList<>();
         //log.info("reading files in " + rootFolder.getFileName());
         String lowerCase = rootFolder.toString().toLowerCase();
-        if (lowerCase.contains("itunes") || lowerCase.contains("calibre")) {
+        if (lowerCase.endsWith("\\itunes") || lowerCase.endsWith("\\calibre") || lowerCase.endsWith("\\audio")) {
             return fileInfos;
         }
         if (rootFolder == null || rootFolder.toFile() == null || rootFolder.toFile().listFiles() == null) {
