@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DuplicateCollection {
-    List<File> duplicateFiles = new ArrayList<>();
+    List<FileInfo> duplicateFiles = new ArrayList<>();
 
-    public void add(File file) {
-        duplicateFiles.add(file);
+    public void add(FileInfo fileInfo) {
+        duplicateFiles.add(fileInfo);
     }
 }

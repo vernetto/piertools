@@ -19,15 +19,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FinderService {
-    public static final int MINSIZEFORDUPLICATE = 1000000;
+    public static final int MINSIZEFORDUPLICATE = 10000000;
     @Autowired
     FilesCrawler filesCrawler;
     BufferedWriter writer = null;
 
-    public List<DuplicateCollection> findDuplicates(String... rootLocations) throws IOException {
+    public List<List<FileInfo>> findDuplicates(String... rootLocations) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         writer = new BufferedWriter(new FileWriter("report.log", true));
-        List<DuplicateCollection> result = new ArrayList<>();
         List<FileInfo> allFiles = new ArrayList<>();
         for (String rootLocation : rootLocations)  {
             allFiles.addAll(filesCrawler.findAllFileInfo(rootLocation));
@@ -78,7 +77,7 @@ public class FinderService {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.writeValue(outputFile, duplicates);
 
-        return result;
+        return duplicates;
     }
 
     public void writeData(String data) {
