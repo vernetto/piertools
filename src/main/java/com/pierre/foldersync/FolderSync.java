@@ -11,10 +11,11 @@ import java.util.stream.Stream;
 
 public class FolderSync {
     public final static boolean DRYRUN = false;
+    public final static boolean DELETEONLY = false;
 
     public static void main(String[] args) {
-        Path source = Path.of("I:\\pierre\\pictures");
-        Path target = Path.of("N:\\pierre\\pictures");
+        Path source = Path.of("I:\\pierre");
+        Path target = Path.of("N:\\pierre");
 
         try {
             syncFolders(source, target);
@@ -44,8 +45,16 @@ public class FolderSync {
                 } else {
                     if (!Files.exists(targetPath) ||
                         Files.getLastModifiedTime(sourcePath).compareTo(Files.getLastModifiedTime(targetPath)) > 0) {
-                        if (!DRYRUN) Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                        System.out.println("COPY " + sourcePath + " " + targetPath);
+                        if (!DRYRUN) {
+                            if (!DELETEONLY) {
+                                if (Files.exists(targetPath)) {
+                                    targetPath.toFile().setWritable(true);
+                                }
+                                Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        }
+                        if (!DELETEONLY) System.out.println("COPY " + sourcePath + " " + targetPath);
+
                     }
                 }
             } catch (IOException e) {
@@ -65,6 +74,9 @@ public class FolderSync {
                             deleteDirectory(targetPath);
                         }
                         else {
+                            if (!Files.isWritable(targetPath)) {
+                                targetPath.toFile().setWritable(true);
+                            }
                             Files.delete(targetPath);
                         }
                     }
@@ -79,10 +91,13 @@ public class FolderSync {
     public static void deleteDirectory(Path path) throws IOException {
         try (Stream<Path> stream = Files.walk(path)) {
             stream.sorted(Comparator.reverseOrder()) // Ensures files are deleted before their parent directories
-                    .forEach(p -> {
+                    .forEach(targetPath -> {
                         try {
-                            System.out.println("DELETING " + p);
-                            Files.delete(p);
+                            System.out.println("DELETING " + targetPath);
+                            if (!Files.isWritable(targetPath)) {
+                                targetPath.toFile().setWritable(true);
+                            }
+                            Files.delete(targetPath);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
