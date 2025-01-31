@@ -17,7 +17,7 @@ public class Mp3OrganizerApplication  {
 
     public void run() throws IOException {
         // Define the path to the directory containing MP3 files
-        Path sourceDirectory = Paths.get("D:\\pierre\\audio\\");
+        Path sourceDirectory = Paths.get("Q:\\pierre\\audio\\");
 
         if (!Files.isDirectory(sourceDirectory)) {
             System.err.println("The provided path is not a directory.");
