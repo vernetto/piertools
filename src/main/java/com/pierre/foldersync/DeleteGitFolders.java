@@ -4,14 +4,15 @@ import java.io.File;
 
 public class DeleteGitFolders {
     public static void main(String[] args) {
-        String rootPath = "N:\\pierre\\github"; // Root directory
-        File rootDir = new File(rootPath);
-
-        if (rootDir.exists() && rootDir.isDirectory()) {
-            deleteGitFolders(rootDir);
-            System.out.println("Deletion completed.");
-        } else {
-            System.out.println("Invalid directory: " + rootPath);
+        String[] rootPaths = new String[] {"I:\\pierre\\github", "N:\\pierre\\github"}; // Root directory
+        for (String rootPath : rootPaths) {
+            File rootDir = new File(rootPath);
+            if (rootDir.exists() && rootDir.isDirectory()) {
+                deleteGitFolders(rootDir);
+                System.out.println("Deletion completed.");
+            } else {
+                System.out.println("Invalid directory: " + rootPath);
+            }
         }
     }
 
