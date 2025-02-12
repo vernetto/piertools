@@ -19,6 +19,35 @@ import org.apache.commons.text.StringEscapeUtils;
 
 public class YouTubeSubtitleProcessor {
 
+
+    public static void main(String[] args) {
+        String videoId = "F3bdEAaabCM";
+        try {
+            // Fetch subtitle URL (replace this with actual subtitle URL fetching code)
+            String subtitleUrl = getSubtitleUrl(videoId);
+
+            // Fetch subtitle content
+            String content = getSubtitleContent(subtitleUrl);
+            Path filePath = Paths.get(videoId + ".raw.txt");
+            Files.write(filePath, content.getBytes());
+
+            // Divide into paragraphs
+            List<String> paragraphs = divideIntoParagraphs(content);
+
+            // Group into segments
+            List<List<String>> segments = groupIntoSegments(paragraphs);
+
+            // Save to file
+            saveToFile(videoId, segments);
+
+            System.out.println("Subtitle processing complete for video ID: " + videoId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     // Step 1: Fetch Subtitle Content
     public static String getSubtitleContent(String subtitleUrl) throws IOException {
         Document doc = Jsoup.connect(subtitleUrl).get();
@@ -112,31 +141,6 @@ public class YouTubeSubtitleProcessor {
         }
     }
 
-    public static void main(String[] args) {
-        String videoId = "F3bdEAaabCM";
-        try {
-            // Fetch subtitle URL (replace this with actual subtitle URL fetching code)
-            String subtitleUrl = getSubtitleUrl(videoId);
-
-            // Fetch subtitle content
-            String content = getSubtitleContent(subtitleUrl);
-            Path filePath = Paths.get(videoId + ".raw.txt");
-            Files.write(filePath, content.getBytes());
-
-            // Divide into paragraphs
-            List<String> paragraphs = divideIntoParagraphs(content);
-
-            // Group into segments
-            List<List<String>> segments = groupIntoSegments(paragraphs);
-
-            // Save to file
-            saveToFile(videoId, segments);
-
-            System.out.println("Subtitle processing complete for video ID: " + videoId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     // Example method to retrieve subtitle URL (from previous example)
     private static String getSubtitleUrl(String videoId) throws IOException {
