@@ -69,7 +69,7 @@ public class SubtitleTranslator {
             Document doc = Jsoup.connect(url).get();
 
             // Corrected translation extraction
-            Element translationElement = doc.select("div[class=translation]").first();
+            Element translationElement = doc.select("div[class=result-container]").first();
             return (translationElement != null) ? translationElement.text() : text; // Corrected extraction method
         } catch (Exception e) {
             return text; // If translation fails, return original text
