@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class UpdateFolderTimestamps {
 
     public static void main(String[] args) throws IOException {
-        Path rootPath = Paths.get("D:/pierre/github");
+        Path rootPath = Paths.get("D:\\pierre\\calibre");
 
         try (Stream<Path> subfolders = Files.list(rootPath)) {
             subfolders.filter(Files::isDirectory)
