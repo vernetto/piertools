@@ -54,7 +54,7 @@ public class FinderService {
                         fileInfo.sha2 = "ERROR";
                     }
                 });
-                // group all files by hash: files with identical hash will be marked as ducplicate
+                // group all files by hash: files with identical hash will be marked as duplicate
                 Map<String, List<FileInfo>> mapWithSameSha2 = fileInfos.stream().collect(Collectors.groupingBy(FileInfo::getSha2));
                 mapWithSameSha2.forEach((theHash, fileInfos1) -> {
                     if (fileInfos1.size() >= 2) {
@@ -72,6 +72,13 @@ public class FinderService {
             }
         });
         closeWriter();
+
+        Comparator<List<FileInfo>> bySizeDescending =
+                Comparator.comparingLong((List<FileInfo> list) -> list.get(0).getSize())
+                        .reversed();
+
+        duplicates.sort(bySizeDescending);
+
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
         File outputFile = new File("duplicates_" + timestamp + ".json");
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);

@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 public class ExecuteActionsApp {
 
-    static final boolean DRYRUN = true;
+    static final boolean DRYRUN = false;
 
     public static void main(String[] args) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Read the entire file as a List<List<FileInfo>>
-        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202411222030.json"),
+        List<List<FileInfo>> fileInfoLists = objectMapper.readValue(new File("duplicates_202507192050.json"),
                 new TypeReference<ArrayList<List<FileInfo>>>() {});
 
         List<FileInfo> fileInfoListsFlat = fileInfoLists.stream()
