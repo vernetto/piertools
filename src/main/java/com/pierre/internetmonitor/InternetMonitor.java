@@ -12,7 +12,7 @@ public class InternetMonitor {
 
     private static final String LOG_FILE = "connection_failures.log";
     private static final String TEST_HOST = "8.8.8.8";  // Google DNS
-    private static final int INTERVAL_SECONDS = 30;
+    private static final int INTERVAL_SECONDS = 10;
 
     public static void main(String[] args) {
         log.info("Starting InternetMonitor. Checking every " + INTERVAL_SECONDS + " seconds...");
