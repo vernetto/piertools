@@ -8,8 +8,8 @@ import java.io.IOException;
 
 public class PdfSearch {
     public static void main(String[] args) throws IOException {
-        String folderPath = "D:/temp/ubsarchive";  // change this
-        String searchString = "turo";           // change this
+        String folderPath = "D:\\pierre\\github\\mamma\\ricette";  // change this
+        String searchString = "89.07";           // change this
 
         File folder = new File(folderPath);
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".pdf"));
